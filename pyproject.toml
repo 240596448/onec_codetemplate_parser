@@ -1,7 +1,17 @@
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "onec_codetemplate_parser"
 version = "0.1.0"
+description = "Парсер шаблонов 1С"
+authors = [{name = "Vladimir Nadulich", email = "g240596448@gmail.com"}]
+license = {text = "MIT"}
+dependencies = ["typer>=0.20.0"]
+
+[project.optional-dependencies]
+dev = ["pytest","pytest-cov"]
+
+[project.scripts]
+onec_codetemplate_parser = "onec_codetemplate_parser.cli:app"
