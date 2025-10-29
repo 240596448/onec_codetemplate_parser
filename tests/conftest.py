@@ -1,5 +1,4 @@
 import pytest
-from onec_codetemplate_parser import main
 from pathlib import Path
 
 TEST_FILE = 'Documents/1C/1c-text-tempates/Надулич.st'

@@ -176,7 +176,7 @@ class Root(Node):
     def from_files(cls, path):
 
         assert not os.path.isfile(path), f"Путь '{path}' является файлом, а не директорией"
-        assert os.path.exists(path), f"Дирректория '{path}' не существует"
+        assert os.path.exists(path), f"Директория '{path}' не существует"
 
         #прочитать все файлы и собрать обратно в дерево
         entries = sorted(os.listdir(path))
