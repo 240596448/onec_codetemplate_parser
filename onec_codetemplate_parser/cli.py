@@ -1,13 +1,14 @@
+"""Консольное приложение для вызова API библиотеки """
+
 import typer
 from .api import parse_to_src, render_from_src
 
-app = typer.Typer(help="Парсер шаблонов 1С")
+app = typer.Typer(help="Парсер шаблонов кода 1С (*.st)")
 
 @app.command()
 def parse(path: str, src: str):
     """Разобрать шаблон из 1с-файла *.st в исходники src"""
-    result = parse_to_src(path, src)
-    typer.echo(result)
+    parse_to_src(path, src)
 
 @app.command()
 def render(src: str, path: str):

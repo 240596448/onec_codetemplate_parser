@@ -188,7 +188,7 @@ class Root(Node):
                 children.append(child)
         return Root(len(children), children)
 
-def parse_skobkofile(text: str) -> Root:
+def parser(text: str) -> Root:
     pos = 0
 
     def skip_ws():
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     with open(path, "r", encoding="utf-8-sig", errors="ignore") as f:
         text = f.read()
 
-    root = parse_skobkofile(text)
+    root = parser(text)
     print("\n✅ Файл успешно прочитан\n")
     root.pretty_print()
 

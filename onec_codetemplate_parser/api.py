@@ -1,4 +1,6 @@
-from .core import parse_skobkofile as parser
+"""Программный интерфейс"""
+
+from .core import parser as parser
 from .core import Root
 from pathlib import Path
 
