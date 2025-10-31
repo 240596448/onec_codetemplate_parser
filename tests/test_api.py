@@ -1,0 +1,17 @@
+from onec_codetemplate_parser import parse_to_src, render_from_src
+from tests.common import folder_is_empty, folder_contains_files
+
+class Test_API:
+
+    def test_parse(self, test_file_path, temp_src):
+        """Тест библиотеки: парсинг"""
+        parse_to_src(str(test_file_path), str(temp_src))
+        assert folder_is_empty(temp_src), f"Папка src пустая {temp_src}"
+        assert folder_contains_files(temp_src), f"В папке нет ни одного файла {temp_src}"
+        
+    def test_render(self, temp_src, tmp_path):
+        """Тест библиотеки: сборка"""
+
+        temp_file = tmp_path / "output.st"
+        render_from_src(str(temp_src), str(temp_file))
+        assert temp_file.exists(), f"Файл сборки не создан {temp_file}"
