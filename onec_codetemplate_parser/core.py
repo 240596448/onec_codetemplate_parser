@@ -159,7 +159,7 @@ class Root(Node):
         for child in self.children:
             parts.append(",\n")
             parts.append(child.compile())
-        parts.append("\n}")
+        parts.append("\n}" if self.children else "}")
         return "".join(parts)
     
     def to_files(self, path):
