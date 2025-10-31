@@ -1,14 +1,16 @@
-import pytest
+"""fixtures for tests"""
+
 from pathlib import Path
+import pytest
 
-TEST_FILE = 'Documents/1C/1c-text-tempates/Надулич.st'
+TEST_FILE = 'Documents/1C/1c-code-templates/Надулич.st'
 
-@pytest.fixture(scope="class")
-def test_file_path():    
+@pytest.fixture(scope="class", name="test_file_path")
+def test_data_path():
     return Path.home() / TEST_FILE
 
 @pytest.fixture(scope="class")
-def test_data(test_file_path):    
+def test_data(test_file_path):
     file_data = test_file_path.read_text(encoding='utf-8-sig')
     return file_data
 

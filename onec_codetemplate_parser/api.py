@@ -1,9 +1,7 @@
 """Программный интерфейс"""
 
-from .core import parser as parser
-from .core import Root
 from pathlib import Path
-
+from .core import Root, parser
 
 def parse_to_src(path: str, src: str):
     """Парсит шаблон 1С-файла и сохраняет структуру файлов в папку"""

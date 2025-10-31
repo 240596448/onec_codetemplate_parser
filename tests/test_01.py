@@ -1,7 +1,7 @@
 from onec_codetemplate_parser import core
 from tests.common import check_files_sequential
 
-class Test_Read_Skobkofile:
+class TestReadSkobkofile:
 
     def test_00_test_file_exist(self, test_file_path):
         assert test_file_path.exists()
@@ -21,7 +21,7 @@ class Test_Read_Skobkofile:
         assert new_data == test_data
 
 
-class Test_Write_To_Files:
+class TestWriteToFiles:
 
     def test_00_to_file(self, test_data, temp_src):
         root = core.parser(test_data)
@@ -35,11 +35,9 @@ class Test_Write_To_Files:
         # Проверка: есть ли папки
         dirs = [p for p in temp_src.iterdir() if p.is_dir()]
         assert len(dirs) == 1
-        assert (temp_src / "001.0_Надулич") in dirs
+        assert temp_src / "001.0_Надулич" in dirs
 
     def test_02_sequential_name(self, temp_src):
         d = temp_src / "001.0_Надулич" / "002.0_Комментарии"
         subfiles = [p.name for p in d.iterdir()]
         check_files_sequential(subfiles)
-
-
