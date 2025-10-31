@@ -5,7 +5,8 @@ from .core import Root, parser
 
 def parse_to_src(path: str, src: str):
     """Парсит шаблон 1С-файла и сохраняет структуру файлов в папку"""
-    root = parser(path)
+    text = Path(path).read_text(encoding='utf-8-sig')
+    root = parser(text)
     root.to_files(src)
 
 def render_from_src(src: str, path: str):
