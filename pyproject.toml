@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "onec_codetemplate_parser"
-version = "0.1.0"
+version = "0.2.0"
 description = "Парсер шаблонов 1С"
 authors = [{name = "Vladimir Nadulich", email = "g240596448@gmail.com"}]
 license = {text = "MIT"}

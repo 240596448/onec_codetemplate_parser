@@ -138,6 +138,7 @@ class Group(Node):
 
 class Root(Node):
     def __init__(self, counter: int, children: List[Union[Group, Leaf]]):
+        super().__init__("root")
         self.counter = int(counter)
         self.children = children
         for child in self.children:
@@ -282,7 +283,7 @@ def parser(text: str) -> Root:
     assert text[pos:] == "", f"Ожидалось конец файла, но есть остаток: {text[pos:]}"
     return root
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) < 2:
         print("Использование: python parse_skobkofile.py <путь_к_файлу>")
         sys.exit(1)
@@ -306,7 +307,7 @@ if __name__ == "__main__":
             f.write(recompiled)
 
         print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
-        print(f"Скомпилированный файл сохранен в {output_path}") 
+        print(f"Скомпилированный файл сохранен в {output_path}")
 
     source_path = 'temp/src'
     root.to_files(source_path)
@@ -324,4 +325,7 @@ if __name__ == "__main__":
             f.write(recompiled)
 
         print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
-        print(f"Скомпилированный файл сохранен в {output_path}") 
+        print(f"Скомпилированный файл сохранен в {output_path}")
+
+if __name__ == "__main__":
+    main()
