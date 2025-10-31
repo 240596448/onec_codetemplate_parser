@@ -21,11 +21,3 @@ def temp_src(tmp_path_factory):
     Папка автоматически удаляется после теста.
     """
     return tmp_path_factory.mktemp("src")
-
-@pytest.fixture(scope="class")
-def temp_src2(tmp_path_factory):
-    """
-    Создаёт временную папку 'src' для теста.
-    Папка автоматически удаляется после теста.
-    """
-    return tmp_path_factory.mktemp("src2")
