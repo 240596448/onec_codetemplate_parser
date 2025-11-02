@@ -7,8 +7,8 @@ import os
 TEST_FILE = 'Documents/1C/1c-code-templates/Надулич.st'
 
 def get_all_test_files():
-    """Автоматически находим все файлы в директории"""
-    st_files = Path(__file__).parent.glob("data/*.st")
+    """Автоматически находим все файлы в директории тестовыйх данных."""
+    st_files = Path(__file__).parent.glob("fixtures/*.st")
     list_st_files = [f for f in st_files if f.is_file()]
     
     list_st_files.append(Path.home()/TEST_FILE)
@@ -23,10 +23,16 @@ def get_all_test_files():
 
 @pytest.fixture(scope="class", name="test_file_path", params=get_all_test_files())
 def test_data_path(request):
+    """
+    Путь к каждому тестовому файлу.
+    """
     return Path(request.param)
 
 @pytest.fixture(scope="class")
 def test_data(test_file_path):
+    """
+    Данные каждого тестового файла.
+    """
     file_data = test_file_path.read_text(encoding='utf-8-sig')
     return file_data
 
