@@ -1,0 +1,4 @@
+include onec_codetemplate_parser/*.py
+
+exclude temp/*
+exclude tests/*

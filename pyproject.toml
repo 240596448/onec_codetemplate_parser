@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "onec_codetemplate_parser"
-version = "0.2.1"
+version = "0.3.0"
 dependencies = [
     "typer>=0.20.0"
 ]
@@ -35,6 +35,5 @@ Repository = "https://github.com/240596448/onec_codetemplate_parser.git"
 [project.scripts]
 onec_codetemplate_parser = "onec_codetemplate_parser.cli:app"
 
-[tool.setuptools.packages.find]
-include = ["onec_codetemplate_parser"]
-exclude = ["tests"]
+[tool.setuptools]
+include-package-data = true
