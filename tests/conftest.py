@@ -1,27 +1,33 @@
 """fixtures for tests"""
 
+import os
+import json
 from pathlib import Path
 import pytest
-import os
 
-TEST_FILE = 'Documents/1C/1c-code-templates/Надулич.st'
-
-def get_all_test_files():
+def get_all_fixtures():
     """Автоматически находим все файлы в директории тестовыйх данных."""
     st_files = Path(__file__).parent.glob("fixtures/*.st")
     list_st_files = [f for f in st_files if f.is_file()]
-    
-    list_st_files.append(Path.home()/TEST_FILE)
 
-    env_st_templates = os.getenv("ST_TEMPLATES")
-    if env_st_templates:
-        st_templates = Path(env_st_templates)
-        if st_templates.is_file():
-            list_st_files.append(st_templates)
+    """Добавляем файлы из внешнего списка, если он задан."""
+    file_list = os.getenv("TEMPLATES_LIST")
+    if file_list:
+        if not Path(file_list).is_file():
+            raise FileNotFoundError(f"Файл списка дополнительных шаблонов не найден: {file_list}")
+        file_lines = Path(file_list).read_text(encoding='utf-8-sig').splitlines()
+        for item in file_lines:
+            item_path = Path(item).expanduser() if item.startswith("~") else Path(item)
+            if item_path.is_file():
+                list_st_files.append(item_path)
+            else:
+                raise FileNotFoundError(
+                    f"Файл шаблона из списка дополнительных файлов "
+                    f"({Path(file_list).name}) не найден: {item_path}")
 
-    return [pytest.param(e, id=e.name) for e in list_st_files]   
+    return [pytest.param(e, id=e.name) for e in list_st_files]
 
-@pytest.fixture(scope="class", name="test_file_path", params=get_all_test_files())
+@pytest.fixture(scope="class", name="test_file_path", params=get_all_fixtures())
 def test_data_path(request):
     """
     Путь к каждому тестовому файлу.
@@ -35,13 +41,6 @@ def test_data(test_file_path):
     """
     file_data = test_file_path.read_text(encoding='utf-8-sig')
     return file_data
-
-@pytest.fixture(scope="class")
-def temp_src_class(tmp_path_factory):
-    """
-    Создаёт временную папку 'src' для класса тестов.
-    """
-    return tmp_path_factory.mktemp("src")
 
 @pytest.fixture()
 def temp_src(tmp_path):
