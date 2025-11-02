@@ -37,9 +37,22 @@ def test_data(test_file_path):
     return file_data
 
 @pytest.fixture(scope="class")
-def temp_src(tmp_path_factory):
+def temp_src_class(tmp_path_factory):
     """
-    Создаёт временную папку 'src' для теста.
-    Папка автоматически удаляется после теста.
+    Создаёт временную папку 'src' для класса тестов.
     """
     return tmp_path_factory.mktemp("src")
+
+@pytest.fixture()
+def temp_src(tmp_path):
+    """
+    Создаёт временную папку 'src' для каждого теста.
+    """
+    return tmp_path / "src"
+
+@pytest.fixture()
+def temp_output_st(tmp_path):
+    """
+    Создаёт временный файл для вывода каждого теста.
+    """
+    return tmp_path / "output.st"

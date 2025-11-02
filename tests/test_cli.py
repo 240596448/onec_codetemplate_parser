@@ -34,8 +34,9 @@ class Test_CLI:
         result = runner.invoke(app, ["parse", str(test_file_path), str(temp_src)])
         assert result.exit_code == 0, result.stdout + result.stderr
 
-    def test_render_command(self, test_file_path, temp_src):
+    def test_render_command(self, test_file_path, temp_src, temp_output_st):
         """Тест выполнения команды сборки"""
-        result = runner.invoke(app, ["render", str(test_file_path), str(temp_src)], catch_exceptions=False)
+        runner.invoke(app, ["parse", str(test_file_path), str(temp_src)])
+        result = runner.invoke(app, ["render", str(temp_output_st), str(temp_src)], catch_exceptions=False)
         assert result.exit_code == 0, result.stdout + result.stderr
-    
+        assert test_file_path.read_text(encoding='utf-8-sig') == temp_output_st.read_text(encoding='utf-8-sig'), 'Собранный файл не совпадает с исходным'
