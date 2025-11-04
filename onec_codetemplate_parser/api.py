@@ -7,10 +7,10 @@ def parse_to_src(path: str, src: str):
     """Парсит шаблон 1С-файла и сохраняет структуру файлов в папку"""
     text = Path(path).read_text(encoding='utf-8-sig')
     root = parser(text)
-    root.to_files(src)
+    root.to_src(src)
 
 def render_from_src(src: str, path: str):
     """Генерирует код шаблона из исходников"""
-    root = Root.from_files(src)
+    root = Root.from_src(src)
     text = root.compile()
     Path(path).write_text(text, encoding='utf-8-sig')

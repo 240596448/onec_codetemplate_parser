@@ -1,16 +1,15 @@
 """fixtures for tests"""
 
 import os
-import json
 from pathlib import Path
 import pytest
 
 def get_all_fixtures():
-    """Автоматически находим все файлы в директории тестовыйх данных."""
+    """Автоматически находим все файлы в директории тестовых данных."""
     st_files = Path(__file__).parent.glob("fixtures/*.st")
     list_st_files = [f for f in st_files if f.is_file()]
 
-    """Добавляем файлы из внешнего списка, если он задан."""
+    # Добавляем файлы из внешнего списка, если он задан
     file_list = os.getenv("TEMPLATES_LIST")
     if file_list:
         if not Path(file_list).is_file():
@@ -29,29 +28,25 @@ def get_all_fixtures():
 
 @pytest.fixture(scope="class", name="test_file_path", params=get_all_fixtures())
 def test_data_path(request):
-    """
-    Путь к каждому тестовому файлу.
-    """
+    """Путь к каждому тестовому файлу."""
     return Path(request.param)
 
 @pytest.fixture(scope="class")
 def test_data(test_file_path):
-    """
-    Данные каждого тестового файла.
-    """
+    """Данные каждого тестового файла."""
     file_data = test_file_path.read_text(encoding='utf-8-sig')
     return file_data
 
 @pytest.fixture()
 def temp_src(tmp_path):
-    """
-    Создаёт временную папку 'src' для каждого теста.
-    """
-    return tmp_path / "src"
+    """Создаёт временную папку 'src' для каждого теста."""
+    src_path = tmp_path / "src"
+    src_path.mkdir()
+    return src_path
 
 @pytest.fixture()
 def temp_output_st(tmp_path):
-    """
-    Создаёт временный файл для вывода каждого теста.
-    """
-    return tmp_path / "output.st"
+    """Создаёт временный файл для вывода каждого теста."""
+    output_path = tmp_path / "output.st"
+    output_path.touch()
+    return output_path

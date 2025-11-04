@@ -1,26 +1,35 @@
-import sys, os, shutil
+"""Парсер и компилятор файлов шаблонов кода 1С в скобочной нотации"""
+
+import sys
 import re
 from typing import List, Union
+from pathlib import Path
+from .repository import LeafRepository, GroupRepository, dir_items
 
 class Node:
+    """Базовый класс узла дерева шаблона"""
+    name: str
+    parent: Union["Group", "Root", None] = None
+    children: List[Union["Group", "Leaf"]] = [] # ERROR ??
+    position: int = 0
+
     def __init__(self, name: str):
         self.name = name
-        self.parent = None
-        self.path = None
-        self.position = None
 
     def set_parent(self, parent):
         self.parent = parent
-        self.position = parent.children.index(self)+1
+        self.position = parent.children.index(self) + 1
 
 class Leaf(Node):
     """Обычный лист с пятью полями"""
+    repo: LeafRepository = None
+
     def __init__(self, name: str, menu_flag: int, replace: str, text: str):
         super().__init__(name)
         self.menu_flag = int(menu_flag)
         self.replace = replace
         self.text = text
-        
+
     def __repr__(self):
         return f"Leaf({self.name!r}, menu={self.menu_flag}, '{self.replace}')"
 
@@ -41,53 +50,34 @@ class Leaf(Node):
             '"}\n}',
         ]
         return "".join(parts)
-    
-    def to_files(self):
 
-        data = [
-            {"Название": self.name},
-            {"ВключатьВКонтекстноеМеню": self.menu_flag},
-            {"АвтоматическиЗаменятьСтроку": self.replace},
-            {"Текст": self.text.replace('""', '"')},
-        ]
-        
-        safe_name = re.sub(r'[\\/*?:"<>|]', "_", self.name)
-        self.path = f"{self.parent.path}/{self.position:03d}.0_{safe_name}.yml"
-
-        with open(self.path, 'w', encoding='utf-8') as f:
-            for item in data:
-                #нужно добавить \n между записями, кроме первой
-                if f.tell() > 0:
-                    f.write("\n")   
-                for key, value in item.items():
-                    f.write(f"[{key}]\n")
-                    f.write(f"{value}")
+    def to_src(self, path):
+        """Сохраняет лист в репозиторий"""
+        self.repo = LeafRepository(self)
+        self.repo.save(path, self.position)
 
     @classmethod
-    def from_files(cls, path):
-        
-        with open(path, 'r', encoding='utf-8') as f:
-            lines = f.readlines()
-            name = lines[1].strip()
-            menu_flag = int(lines[3].strip())
-            replace = lines[5].strip()
-            text = ''.join(lines[7:]).replace('"', '""')
-            leaf = Leaf(name, menu_flag, replace, text)
-            
+    def from_src(cls, path):
+        """Создает лист из репозитория по пути"""
+        repo = LeafRepository.read(path)
+        leaf = Leaf(repo.name, repo.menu_flag, repo.replace, repo.text)
+        leaf.repo = repo
         return leaf
 
 class Group(Node):
     """Группа: заголовок + список подэлементов (листов/групп)"""
-    def __init__(self, counter: int, name: str, children: List[Union["Group", Leaf]]):
+
+    repo: GroupRepository = None
+
+    def __init__(self, name: str, children: List[Union["Group", Leaf]]):
         super().__init__(name)
-        self.counter = int(counter)
         self.children = children
         for child in self.children:
             child.set_parent(self)
 
     def __repr__(self):
         return f"Group({self.name!r}, {len(self.children)} children)"
-    
+
     def pretty_print(self, indent=0):
         pad = " " * indent
         print(f"{pad}- Group: {self.name}")
@@ -97,7 +87,7 @@ class Group(Node):
     def compile(self) -> str:
         parts = [
             '{',
-            str(self.counter),
+            str(len(self.children)),
             ',\n{',
             f'"{self.name}"',
             ',1,0,"",""}',
@@ -107,39 +97,28 @@ class Group(Node):
             parts.append(child.compile())
         parts.append('\n}')
         return "".join(parts)
-    
-    def to_files(self):
-        safe_name = re.sub(r'[\\/*?:"<>|]', "_", self.name)
-        self.path = f"{self.parent.path}/{self.position:03d}.0_{safe_name}"
-        
-        assert not os.path.isfile(self.path), f"Путь '{self.path}' является файлом, а не директорией"
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
+
+    def to_src(self, path):
+        """Сохраняет группу в репозиторий"""
+        self.repo = GroupRepository(self)
+        self.repo.save(path, self.position)
 
         for child in self.children:
-            child.to_files()
+            child.to_src(self.repo.path)
 
     @classmethod
-    def from_files(cls, path):
-        
-        entries = sorted(os.listdir(path))
-        children = []
-        for entry in entries:
-            full_path = os.path.join(path, entry)
-            if os.path.isdir(full_path):
-                child = Group.from_files(full_path)
-                children.append(child)
-            else:
-                #лист
-                children.append(Leaf.from_files(full_path))
-        #создать группу
-        group_name = re.sub(r'^.+?_', '', os.path.basename(path))
-        return Group(len(children), group_name, children)
+    def from_src(cls, path):
+        repo = GroupRepository.read(path)
+        group = Group(repo.name, src_items(path))
+        group.repo = repo
+        return group
 
 class Root(Node):
-    def __init__(self, counter: int, children: List[Union[Group, Leaf]]):
+    """Корневой узел дерева шаблона"""
+    repo: GroupRepository = None
+
+    def __init__(self, children: List[Union[Group, Leaf]]):
         super().__init__("root")
-        self.counter = int(counter)
         self.children = children
         for child in self.children:
             child.set_parent(self)
@@ -155,39 +134,40 @@ class Root(Node):
         print("")
 
     def compile(self) -> str:
-        parts = [ "{", str(self.counter) ]
+        parts = [ "{", str(len(self.children)) ]
         for child in self.children:
             parts.append(",\n")
             parts.append(child.compile())
         parts.append("\n}" if self.children else "}")
         return "".join(parts)
-    
-    def to_files(self, path):
-        self.path = path
-        
-        assert not os.path.isfile(path), f"Путь '{path}' является файлом, а не директорией"
-        if os.path.exists(path):
-            shutil.rmtree(path)
-        os.makedirs(path)
+
+    def to_src(self, path):
+        """Сохраняет группу в репозиторий"""
+        # self.repo = GroupRepository(self)
+        # self.repo.save(path, self.position)
 
         for child in self.children:
-            child.to_files()
-    
-    @classmethod
-    def from_files(cls, path):
+            # child.to_src(self.repo.path)
+            child.to_src(path)
 
-        assert not os.path.isfile(path), f"Путь '{path}' является файлом, а не директорией"
-        assert os.path.exists(path), f"Директория '{path}' не существует"
+    @staticmethod
+    def from_src(path):
+        """Прочитать все файлы рекурсивно в объекты дерева"""
 
-        #прочитать все файлы и собрать обратно в дерево
-        entries = sorted(os.listdir(path))
-        children = []
-        for entry in entries:
-            full_path = os.path.join(path, entry)
-            if os.path.isdir(full_path):
-                child = Group.from_files(full_path)
-                children.append(child)
-        return Root(len(children), children)
+        assert Path(path).exists(), f"Директория '{path}' не существует"
+        assert Path(path).is_dir(), f"Путь '{path}' не является директорией"
+
+        return Root(src_items(path))
+
+def src_items(path: Path|str) -> List[Union[Group, Leaf]]:
+    children = []
+    for item in dir_items(path):
+        if item.is_dir():
+            child = Group.from_src(item)
+        else:
+            child = Leaf.from_src(item)
+        children.append(child)
+    return children
 
 def parser(text: str) -> Root:
     pos = 0
@@ -267,10 +247,10 @@ def parser(text: str) -> Root:
         take("}")
         children = parse_children(count)
         take("}")
-        
+
         # Создаем правильный тип объекта в зависимости от is_group
         if int(is_group) == 1:
-            return  Group(count, name, children)
+            return  Group(name, children)
         elif int(is_group) == 0:
             return Leaf(name, menu_flag, replace, text_val)
         else:
@@ -278,7 +258,7 @@ def parser(text: str) -> Root:
 
     take("{")
     count = numeric_value()
-    root = Root(count, parse_children(count))
+    root = Root(parse_children(count))
     take("}")
     assert text[pos:] == "", f"Ожидалось конец файла, но есть остаток: {text[pos:]}"
     return root
@@ -310,9 +290,9 @@ def main():
         print(f"Скомпилированный файл сохранен в {output_path}")
 
     source_path = 'temp/src'
-    root.to_files(source_path)
+    root.to_src(source_path)
 
-    root2 = Root.from_files(source_path)
+    root2 = Root.from_src(source_path)
 
     recompiled = root2.compile()
 

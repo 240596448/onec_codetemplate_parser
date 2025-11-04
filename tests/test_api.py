@@ -1,5 +1,5 @@
 from onec_codetemplate_parser import parse_to_src, render_from_src
-from tests.common import folder_is_empty, folder_contains_files
+from tests.common import folder_is_empty
 
 class Test_API:
 
