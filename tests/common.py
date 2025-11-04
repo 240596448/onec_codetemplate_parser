@@ -17,9 +17,8 @@ def check_files_sequential(files: list[str]):
         expected_number += 1
 
 def folder_is_empty(path):
-    return len(list(Path(path).iterdir())) != 0
+    return len(list(Path(path).iterdir())) == 0
 
 def folder_contains_files(path):
     files = [f.name for f in Path(path).rglob('*') if f.is_file()]
     return len(files) > 0
-

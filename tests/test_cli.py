@@ -4,7 +4,7 @@ from onec_codetemplate_parser.cli import app
 
 runner = CliRunner()
 
-class Test_CLI:
+class TestCLI:
 
     def test_help_command(self):
         """Тест вывода справки"""
@@ -30,27 +30,27 @@ class Test_CLI:
         assert "path " in result.stdout, result.stdout
         assert "src " in result.stdout, result.stdout
 
-    def test_parse_command(self, test_file_path, temp_src):
+    def test_parse_command(self, file_path, temp_src):
         """Тест выполнения команды парсинга"""
-        result = runner.invoke(app, ["parse", str(test_file_path), str(temp_src)])
+        result = runner.invoke(app, ["parse", str(file_path), str(temp_src)])
         assert result.exit_code == 0, result.stdout + result.stderr
 
-    def test_render_command(self, test_file_path, temp_src, temp_output_st):
+    def test_render_command(self, file_path_spec, temp_src, temp_output_st):
         """Тест выполнения команды сборки"""
-        if test_file_path.name == '00-empty.st':
-            print("Пропускаем тест: папка SRC будет пустой, CLI не пройдет валидацию")
-            pytest.skip(reason="Пропускаем тест: папка SRC будет пустой, CLI не пройдет валидацию")
+        if file_path_spec.level == 0:
+            pytest.skip(reason=f"Пропускаем тест {file_path_spec.name}: папка SRC будет пустой, CLI не пройдет валидацию")
             return
-        runner.invoke(app, ["parse", str(test_file_path), str(temp_src)])
+        file_path = file_path_spec.path
+        runner.invoke(app, ["parse", str(file_path), str(temp_src)])
         result = runner.invoke(app, ["render", str(temp_output_st), str(temp_src)], catch_exceptions=False)
         assert result.exit_code == 0, result.stdout + result.stderr
-        assert test_file_path.read_text(encoding='utf-8-sig') == temp_output_st.read_text(encoding='utf-8-sig'), 'Собранный файл не совпадает с исходным'
+        assert file_path.read_text(encoding='utf-8-sig') == temp_output_st.read_text(encoding='utf-8-sig'), 'Собранный файл не совпадает с исходным'
 
-    def test_pretty_print_command(self, test_file_path):
+    def test_pretty_print_command(self, file_path_spec):
         """Тест выполнения команды парсинга"""
-        result = runner.invoke(app, ["pretty", str(test_file_path)])
+        result = runner.invoke(app, ["pretty", str(file_path_spec.path)])
         assert result.exit_code == 0, result.stdout + result.stderr
-        if test_file_path.name == '00-empty.st_':
-            assert len(result.stdout.splitlines()) == 1, result.stdout + result.stderr
-        else:
+        if file_path_spec.objects is None:
             assert len(result.stdout.splitlines()) > 1, result.stdout + result.stderr
+        else:
+            assert len(result.stdout.rstrip(). splitlines()) == file_path_spec.objects + 1, result.stdout + result.stderr
