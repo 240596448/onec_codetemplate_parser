@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "onec_codetemplate_parser"
-version = "0.4.0"
+version = "1.0.0"
 dependencies = [
     "typer>=0.20.0"
 ]
@@ -23,7 +23,8 @@ keywords = ["1c", "onec"]
 [project.optional-dependencies]
 dev = [
     "pytest",
-    "pytest-cov"
+    "pytest-cov",
+    "pytest-env"
 ]
 
 [project.urls]
@@ -36,4 +37,5 @@ Repository = "https://github.com/240596448/onec_codetemplate_parser.git"
 onec_codetemplate_parser = "onec_codetemplate_parser.cli:app"
 
 [tool.setuptools]
+packages = ["onec_codetemplate_parser"] 
 include-package-data = true
