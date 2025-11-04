@@ -27,6 +27,9 @@ render_from_src("path/to/template.st", "./src")
 ### Основные команды:
 
 ```bash
+# Вывести дерево файла шаблонов в консоль
+onec_codetemplate_parser pretty path/to/template.st
+
 # Выгрузка файла в исходники
 onec_codetemplate_parser parse path/to/template.st ./src
 
@@ -41,7 +44,7 @@ onec-onec_codetemplate_parser --help
 
 ## Лицензия
 
-MIT
+[MIT License](LICENSE)
 
 
 
