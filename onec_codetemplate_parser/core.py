@@ -1,7 +1,5 @@
 """Парсер и компилятор файлов шаблонов кода 1С в скобочной нотации"""
 
-import sys
-import re
 from typing import List, Union
 from pathlib import Path
 from .repository import LeafRepository, GroupRepository, dir_items
@@ -169,143 +167,49 @@ def src_items(path: Path|str) -> List[Union[Group, Leaf]]:
         children.append(child)
     return children
 
-def parser(text: str) -> Root:
-    pos = 0
+# def main():
+#     if len(sys.argv) < 2:
+#         print("Использование: python parse_skobkofile.py <путь_к_файлу>")
+#         sys.exit(1)
 
-    def skip_ws():
-        nonlocal pos
-        while pos < len(text) and text[pos] in " \n\r\t":
-            pos += 1
+#     path = sys.argv[1]
+#     with open(path, "r", encoding="utf-8-sig", errors="ignore") as f:
+#         text = f.read()
 
-    def take(s: str):
-        nonlocal pos
-        skip_ws()
-        length = len(s)
-        assert text[pos:pos+length] == s, f"Ожидалось '{s}' на позиции {pos}"
-        pos += length
-        skip_ws()
+#     root = parser(text)
+#     print("\n✅ Файл успешно прочитан\n")
+#     root.pretty_print()
 
-    def parse_value():
-        nonlocal pos
-        if text[pos] == '"':
-            return string_value()
-        else:
-            return numeric_value()
+#     recompiled = root.compile()
 
-    def string_value():
-        nonlocal pos
-        pos += 1
-        start = pos
-        while True:
-            if text[pos] != '"':
-                pos += 1
-            elif text[pos:pos+2] == '""':
-                pos += 2
-            else:
-                break
-        s = text[start:pos]
-        pos += 1
-        return s
+#     if recompiled == text:
+#         print("✅ Файл успешно скомпилирован и совпадает с исходником")
+#     else:
+#         # запись обратно в контрольный файл
+#         output_path = path + ".out"
+#         with open(output_path, "w", encoding="utf-8-sig") as f:
+#             f.write(recompiled)
 
-    def numeric_value():
-        nonlocal pos
-        m = re.match(r"-?\d+", text[pos:])
-        if not m:
-            raise ValueError(f"Ожидалось число на позиции {pos}")
-        val = m.group(0)
-        pos += len(val)
-        return int(val)
+#         print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
+#         print(f"Скомпилированный файл сохранен в {output_path}")
 
-    def parse_children(count: int):
-        nonlocal pos
-        children = []
-        for _ in range(count):
-            take(",")
-            child = parse_node()
-            children.append(child)
-        return children
+#     source_path = 'temp/src'
+#     root.to_src(source_path)
 
-    def parse_node() -> Union[Group, Leaf]:
-        """
-        Парсит один объект — либо группу, либо лист
-        { count, { "Имя", флаг1, флаг2, "Поле4", "Поле5" } }
-        """
-        nonlocal pos
-        take("{")
-        count = numeric_value()
-        take(",")
-        take("{")
-        name = parse_value()
-        take(",")
-        is_group = numeric_value()
-        take(",")
-        menu_flag = numeric_value()
-        take(",")
-        replace = parse_value()
-        take(",")
-        text_val = parse_value()
-        take("}")
-        children = parse_children(count)
-        take("}")
+#     root2 = Root.from_src(source_path)
 
-        # Создаем правильный тип объекта в зависимости от is_group
-        if int(is_group) == 1:
-            return  Group(name, children)
-        elif int(is_group) == 0:
-            return Leaf(name, menu_flag, replace, text_val)
-        else:
-            raise ValueError(f"Неизвестный значение флага is_group: {is_group}")
+#     recompiled = root2.compile()
 
-    take("{")
-    count = numeric_value()
-    root = Root(parse_children(count))
-    take("}")
-    assert text[pos:] == "", f"Ожидалось конец файла, но есть остаток: {text[pos:]}"
-    return root
+#     if recompiled == text:
+#         print("✅ Файл успешно скомпилирован и совпадает с исходником")
+#     else:
+#         # запись обратно в контрольный файл
+#         output_path = path + ".out"
+#         with open(output_path, "w", encoding="utf-8-sig") as f:
+#             f.write(recompiled)
 
-def main():
-    if len(sys.argv) < 2:
-        print("Использование: python parse_skobkofile.py <путь_к_файлу>")
-        sys.exit(1)
+#         print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
+#         print(f"Скомпилированный файл сохранен в {output_path}")
 
-    path = sys.argv[1]
-    with open(path, "r", encoding="utf-8-sig", errors="ignore") as f:
-        text = f.read()
-
-    root = parser(text)
-    print("\n✅ Файл успешно прочитан\n")
-    root.pretty_print()
-
-    recompiled = root.compile()
-
-    if recompiled == text:
-        print("✅ Файл успешно скомпилирован и совпадает с исходником")
-    else:
-        # запись обратно в контрольный файл
-        output_path = path + ".out"
-        with open(output_path, "w", encoding="utf-8-sig") as f:
-            f.write(recompiled)
-
-        print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
-        print(f"Скомпилированный файл сохранен в {output_path}")
-
-    source_path = 'temp/src'
-    root.to_src(source_path)
-
-    root2 = Root.from_src(source_path)
-
-    recompiled = root2.compile()
-
-    if recompiled == text:
-        print("✅ Файл успешно скомпилирован и совпадает с исходником")
-    else:
-        # запись обратно в контрольный файл
-        output_path = path + ".out"
-        with open(output_path, "w", encoding="utf-8-sig") as f:
-            f.write(recompiled)
-
-        print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
-        print(f"Скомпилированный файл сохранен в {output_path}")
-
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

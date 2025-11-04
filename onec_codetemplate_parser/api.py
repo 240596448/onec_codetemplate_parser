@@ -1,12 +1,13 @@
 """Программный интерфейс"""
 
 from pathlib import Path
-from .core import Root, parser
+from .core import Root
+from .parser import parse
 
 def parse_to_src(path: str, src: str):
     """Парсит шаблон 1С-файла и сохраняет структуру файлов в папку"""
     text = Path(path).read_text(encoding='utf-8-sig')
-    root = parser(text)
+    root = parse(text)
     root.to_src(src)
 
 def render_from_src(src: str, path: str):

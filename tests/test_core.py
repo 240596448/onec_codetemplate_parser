@@ -1,4 +1,5 @@
-from onec_codetemplate_parser import core, repository
+from onec_codetemplate_parser import repository
+from onec_codetemplate_parser.parser import parse
 from tests.common import check_files_sequential
 
 class TestReadSkobkofile:
@@ -7,12 +8,12 @@ class TestReadSkobkofile:
         assert test_file_path.exists()
 
     def test_01_parse_eq_compile(self, test_data):
-        root = core.parser(test_data)
+        root = parse(test_data)
         new_data = root.compile()
         assert new_data == test_data
 
     def test_02_save_and_read(self, test_data, tmp_path):
-        root = core.parser(test_data)
+        root = parse(test_data)
         new_data = root.compile()
 
         tmp_file = tmp_path / 'tmp.st'
@@ -24,7 +25,7 @@ class TestReadSkobkofile:
 class TestWriteToFiles:
 
     def test_white_to_src(self, test_data, temp_src):
-        root = core.parser(test_data)
+        root = parse(test_data)
         root.to_src(temp_src)
 
         # TODO: добавить разные проверки для каждого файла
