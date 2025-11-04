@@ -1,7 +1,7 @@
 from onec_codetemplate_parser import parse_to_src, render_from_src
 from tests.common import folder_is_empty
 
-class Test_API:
+class TestAPI:
 
     def test_parse(self, file_path_spec, temp_src):
         """Тест библиотеки: парсинг"""
@@ -10,7 +10,7 @@ class Test_API:
             assert not folder_is_empty(temp_src), f"Папка src пустая {temp_src}"
         else:
             assert folder_is_empty(temp_src), f"Для пустого файла что-то распарсилось {temp_src}"
-        
+
     def test_render(self, file_path, temp_src, tmp_path):
         """Тест библиотеки: сборка"""
 

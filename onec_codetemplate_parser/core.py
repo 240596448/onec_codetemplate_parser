@@ -8,7 +8,7 @@ class Node:
     """Базовый класс узла дерева шаблона"""
     name: str
     parent: Union["Group", "Root", None] = None
-    children: List[Union["Group", "Leaf"]] = [] # ERROR ??
+    children: List[Union["Group", "Leaf"]] = []
     position: int = 0
 
     def __init__(self, name: str):
@@ -140,12 +140,8 @@ class Root(Node):
         return "".join(parts)
 
     def to_src(self, path):
-        """Сохраняет группу в репозиторий"""
-        # self.repo = GroupRepository(self)
-        # self.repo.save(path, self.position)
-
+        """Сохраняет дочерние группы в репозиторий"""
         for child in self.children:
-            # child.to_src(self.repo.path)
             child.to_src(path)
 
     @staticmethod
@@ -166,50 +162,3 @@ def src_items(path: Path|str) -> List[Union[Group, Leaf]]:
             child = Leaf.from_src(item)
         children.append(child)
     return children
-
-# def main():
-#     if len(sys.argv) < 2:
-#         print("Использование: python parse_skobkofile.py <путь_к_файлу>")
-#         sys.exit(1)
-
-#     path = sys.argv[1]
-#     with open(path, "r", encoding="utf-8-sig", errors="ignore") as f:
-#         text = f.read()
-
-#     root = parser(text)
-#     print("\n✅ Файл успешно прочитан\n")
-#     root.pretty_print()
-
-#     recompiled = root.compile()
-
-#     if recompiled == text:
-#         print("✅ Файл успешно скомпилирован и совпадает с исходником")
-#     else:
-#         # запись обратно в контрольный файл
-#         output_path = path + ".out"
-#         with open(output_path, "w", encoding="utf-8-sig") as f:
-#             f.write(recompiled)
-
-#         print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
-#         print(f"Скомпилированный файл сохранен в {output_path}")
-
-#     source_path = 'temp/src'
-#     root.to_src(source_path)
-
-#     root2 = Root.from_src(source_path)
-
-#     recompiled = root2.compile()
-
-#     if recompiled == text:
-#         print("✅ Файл успешно скомпилирован и совпадает с исходником")
-#     else:
-#         # запись обратно в контрольный файл
-#         output_path = path + ".out"
-#         with open(output_path, "w", encoding="utf-8-sig") as f:
-#             f.write(recompiled)
-
-#         print("❌ Файл успешно скомпилирован, но не совпадает с исходником")
-#         print(f"Скомпилированный файл сохранен в {output_path}")
-
-# if __name__ == "__main__":
-#     main()

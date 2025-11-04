@@ -52,7 +52,7 @@ class TestWriteToFiles:
             
             files = [p for p in next(temp_src.iterdir()).iterdir() if p.is_file()]
             assert len(files) == 2, f"Ожидалось 2 файла в src/001(.meta и leaf), получили {len(files)}"
-            
+        
         if file_data_spec.name == "09-brackets":
             folder = "001.0_Новый1"
             assert (temp_src/folder).exists(), f"Папка первого уровня {folder} не найдена в {file_data_spec.name}"

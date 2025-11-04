@@ -64,7 +64,6 @@ def parse(text: str) -> Root:
         Парсит один объект — либо группу, либо лист
         { count, { "Имя", флаг1, флаг2, "Поле4", "Поле5" } }
         """
-        # nonlocal pos
         take("{")
         count = numeric_value()
         take(",")
