@@ -45,3 +45,12 @@ class Test_CLI:
         result = runner.invoke(app, ["render", str(temp_output_st), str(temp_src)], catch_exceptions=False)
         assert result.exit_code == 0, result.stdout + result.stderr
         assert test_file_path.read_text(encoding='utf-8-sig') == temp_output_st.read_text(encoding='utf-8-sig'), 'Собранный файл не совпадает с исходным'
+
+    def test_pretty_print_command(self, test_file_path):
+        """Тест выполнения команды парсинга"""
+        result = runner.invoke(app, ["pretty", str(test_file_path)])
+        assert result.exit_code == 0, result.stdout + result.stderr
+        if test_file_path.name == '00-empty.st_':
+            assert len(result.stdout.splitlines()) == 1, result.stdout + result.stderr
+        else:
+            assert len(result.stdout.splitlines()) > 1, result.stdout + result.stderr

@@ -1,14 +1,15 @@
 """Консольное приложение для вызова API библиотеки """
 
-import typer
 from pathlib import Path
-from .api import parse_to_src, render_from_src
+import typer
+from .api import parse_to_src, render_from_src, pretty_print
 
 app = typer.Typer(
     help="Парсер шаблонов кода 1С.\n\n"
          "Позволяет разбирать шаблоны *.st в исходники src и обратно.")
 
 def validate_file_enable(value: str):
+    """Проверка существования и размера файла"""
     path = Path(value)
     if not path.is_file():
         raise typer.BadParameter(f"Файл отсутствует '{value}'")
@@ -17,6 +18,7 @@ def validate_file_enable(value: str):
     return path
 
 def validate_empty_dir(value: str):
+    """Проверка существования и пустоты папки"""
     path = Path(value)
     if not path.is_dir() or not any(path.iterdir()):
         raise typer.BadParameter(f"Папка '{value}' не существует или пуста.")
@@ -24,7 +26,7 @@ def validate_empty_dir(value: str):
 
 @app.command(help="Разобрать шаблон из 1С-файла *.st в исходники src")
 def parse(
-        path: str = typer.Argument(..., 
+        path: str = typer.Argument(...,
             callback=validate_file_enable,
             help="Путь к исходному 1С-файлу шаблона *.st", ),
         src: str = typer.Argument('./src', help="Папка, в которую будут сохранены исходники src")
@@ -52,6 +54,21 @@ def render(
     """
     render_from_src(src, path)
     typer.echo(f"Шаблон собран из папки {src} в файл {path}")
+
+
+@app.command(help="Показать структуру файла *.st")
+def pretty(
+        path: str = typer.Argument(...,
+            callback=validate_file_enable,
+            help="Путь к исходному 1С-файлу шаблона *.st", )
+    ):
+    """
+    Визуализация структуры 1С-шаблон (*.st) в виде дерева.
+    
+    Пример:
+        onec_codetemplate_parser pretty my_template.st
+    """
+    pretty_print(path)
 
 
 if __name__ == "__main__":

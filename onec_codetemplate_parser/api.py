@@ -15,3 +15,9 @@ def render_from_src(src: str, path: str):
     root = Root.from_src(src)
     text = root.compile()
     Path(path).write_text(text, encoding='utf-8-sig')
+
+def pretty_print(path: str):
+    """Выводит в консоль дерево шаблона"""
+    text = Path(path).read_text(encoding='utf-8-sig')
+    root = parse(text)
+    root.pretty_print()
