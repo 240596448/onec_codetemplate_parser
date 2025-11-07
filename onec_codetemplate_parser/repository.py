@@ -22,7 +22,7 @@ class LeafRepository():
     def save(self, path: str, position: int):
         """Записывает элемент в файл"""
         safe_name = safe_filename(self.name)
-        file_name = f"{position:03d}.0_{safe_name}.txt"
+        file_name = f"{position:03d}.0_{safe_name}.ini"
         leaf_path = Path(path) / file_name
         self.path = str(leaf_path)
 
@@ -56,7 +56,7 @@ class GroupRepository():
     @staticmethod
     def metafile() -> str:
         """Возвращает имя служебного файла с данными группы"""
-        return ".group_data"
+        return ".group_data.ini"
     def group_data(self) -> Path:
         """Возвращает путь к файлу с данными группы"""
         return Path(self.path) / self.metafile()
